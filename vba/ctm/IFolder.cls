@@ -14,10 +14,13 @@ Implements ITag
 Implements ITagData
 Implements IJob
 
+
 Private mBase As IJob
 
 Private mJobs As Collection
 Private mSubFolders As Collection
+
+
 
 
 Public Property Get Jobs() As Collection
@@ -28,8 +31,8 @@ Public Property Get SubFolders() As Collection
     Set SubFolders = mSubFolders
 End Property
 
-Public Sub AddSubItem(v As IJob)
-    Set v.Parent = Me
+Public Sub AddSubItem(v As IJob, thisParent As IJob)
+    Set v.Parent = thisParent
     mSubFolders.Add v
 End Sub
 
@@ -43,7 +46,6 @@ Private Sub Class_Initialize()
         
     Set mJobs = New Collection
     Set mSubFolders = New Collection
-    
     
 End Sub
 
@@ -1504,9 +1506,11 @@ Private Function IXMLConfigItem_Export(doc As MSXML2.IXMLDOMDocument2, Parent As
             item.Export doc, current
         Next
     Else
-        Set subItem = doc.createElement("RULE_BASED_CALENDARS")
-        subItem.setAttribute "NAME", "*"
-        current.appendChild subItem
+        If Not baseJob.Parent Is Nothing Then
+            Set subItem = doc.createElement("RULE_BASED_CALENDARS")
+            subItem.setAttribute "NAME", "*"
+            current.appendChild subItem
+        End If
     End If
     
     For Each item In mJobs

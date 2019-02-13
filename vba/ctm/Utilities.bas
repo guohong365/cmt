@@ -32,52 +32,9 @@ Public Sub SetToEveryDay(data As ITagData, Optional name As String = "")
     data.OCT = "1"
     data.NOV = "1"
     data.DEC = "1"
-    
-    data.Level = "N"
-    data.MaxWait = "0"
-    data.Retro = "0"
-    data.Shift = "Ignore Job"
-End Sub
-
-Public Sub SetDefaultJob(job As IJob)
-    Dim base As ITagData
-    Set base = job
-    SetToEveryDay base
-    base.Level = Empty
-    base.MaxWait = Empty
-    base.Retro = Empty
-    base.Shift = Empty
-    
-    
-    job.AdjustCond = "N"
-    job.CreationDate = Format(Date, "yyyyMMdd")
-    job.CreationTime = Format(Time, "HHmmss")
 End Sub
 
 
-
-Public Sub SetDefaultSmartFolder(smartFolder As ISmartFolder)
-    Dim base As ITagData
-    Dim job As IJob
-    Dim folder As IFolder
-    Set base = smartFolder
-    
-    SetToEveryDay base
-    
-    Set job = base
-    
-    SetDefaultFolder folder
-    
-    job.ApplType = "OS"
-    smartFolder.EnforceValidation = "N"
-    smartFolder.FolderOrderMethod = "SYSTEM"
-    smartFolder.Modified = "False"
-    smartFolder.UsedByCode = "0"
-    base.Shift = "Ignore Job"
-    job.TaskType = "SMART Table"
-    job.VersionSerial = "1"
-    
-End Sub
 
 Function GetFolderPath(current As IJob) As String
     Dim p As IJob

@@ -22,7 +22,6 @@ Private mDataCenter As Variant
 Private mDAYSKEEPINNOTOK As Variant
 Private mENFORCE_VALIDATION As Variant 'Y,N
 Private mFOLDER_DSN As Variant
-Private mFOLDER_NAME As Variant
 Private mFOLDER_ORDER_METHOD As Variant
 Private mLAST_UPLOAD As Variant
 Private mMODIFIED As Variant
@@ -71,10 +70,9 @@ Public Property Let FolderDSN(v As Variant)
     mFOLDER_DSN = v
 End Property
 Public Property Get FolderName() As Variant
-    FolderName = mFOLDER_NAME
-End Property
-Public Property Let FolderName(v As Variant)
-    mFOLDER_NAME = v
+    Dim base As IJob
+    Set base = mBase
+    FolderName = base.JobName
 End Property
 
 Public Property Get FolderOrderMethod() As Variant
@@ -185,9 +183,8 @@ Private Sub Class_Initialize()
     Dim base As IXMLConfigItem
     Set mBase = New IFolder
     Set base = mBase
-    base.Reset
-    base.XMLTagName = "SMART_FOLDER"
     
+    base.XMLTagName = "SMART_FOLDER"
     
     Set mADDITIONAL_FOLDER_DETAILS = New Collection
     
@@ -206,7 +203,6 @@ Private Sub Class_Initialize()
     cfg.XMLTagName = "RULE_BASED_CALENDAR"
     baseJob.RuleBasedCalendar.Add tagData
     
-    ClearCollection baseJob.RuleBasedCalendars
 End Sub
 
 Private Property Get IFolder_Jobs() As Collection
@@ -221,10 +217,10 @@ Private Property Get IFolder_SubFolders() As Collection
     Set IFolder_SubFolders = base.SubFolders
 End Property
 
-Private Sub IFolder_AddSubItem(v As IJob)
+Private Sub IFolder_AddSubItem(v As IJob, thisParent As IJob)
     Dim base As IFolder
     Set base = mBase
-    base.AddSubItem v
+    base.AddSubItem v, thisParent
 End Sub
 
 
@@ -1668,6 +1664,7 @@ End Property
 
 Private Function IXMLConfigItem_Export(doc As MSXML2.IXMLDOMDocument2, Parent As MSXML2.IXMLDOMElement) As MSXML2.IXMLDOMElement
     Dim base As IXMLConfigItem
+    Dim job As IJob
     Dim subFolder As IFolder
     
     Dim current As IXMLDOMElement
@@ -1676,6 +1673,7 @@ Private Function IXMLConfigItem_Export(doc As MSXML2.IXMLDOMDocument2, Parent As
     Dim attr As IXMLDOMAttribute
     
     Set base = mBase
+    Set job = mBase
     Set current = base.Export(doc, Parent)
     
     For Each item In mADDITIONAL_FOLDER_DETAILS
@@ -1698,8 +1696,8 @@ Private Function IXMLConfigItem_Export(doc As MSXML2.IXMLDOMDocument2, Parent As
         current.setAttribute "FOLDER_DSN", mFOLDER_DSN
     End If
     
-    If Not IsEmpty(mFOLDER_NAME) Then
-        current.setAttribute "FOLDER_NAME", mFOLDER_NAME
+    If Not IsEmpty(job.JobName) Then
+        current.setAttribute "FOLDER_NAME", job.JobName
     End If
     
     If Not IsEmpty(mFOLDER_ORDER_METHOD) Then
@@ -1746,8 +1744,8 @@ Private Function IXMLConfigItem_Export(doc As MSXML2.IXMLDOMDocument2, Parent As
         current.setAttribute "TABLE_USERDAILY", mTABLE_USERDAILY
     End If
     
-    If Not IsEmpty(mTYPE_) Then
-        current.setAttribute "TYPE", mTYPE_
+    If Not IsEmpty(mTYPE) Then
+        current.setAttribute "TYPE", mTYPE
     End If
     
     If Not IsEmpty(mUSED_BY) Then

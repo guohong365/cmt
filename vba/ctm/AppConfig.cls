@@ -13,6 +13,8 @@ Private mSmartFolders As Collection
 
 Private mJobs As Collection
 Private mSchedulings As Collection
+Private mCreationDate As String
+Private mCreationTime As String
 
 
 Private mCheckers As Collection
@@ -141,9 +143,12 @@ Public Sub ExportXML(xmlPath As String)
     Dim item As IJob
     Dim base As IXMLConfigItem
     Dim itemName As String
-    
+    Dim str As String
     For Each item In mSmartFolders
         Set base = item
+        str = base.XMLTagName
+        str = item.JobName
+        str = TypeName(item)
         base.Export xmlDoc, xmlRoot
     Next
     
@@ -190,6 +195,9 @@ Private Sub ParseJobs(sheet As Worksheet)
     index = 3
     Do While Not (IsEmpty(sheet.Cells(index, 1)) Or sheet.Cells(index, 1) = "")
         Set job = New IJob
+        
+        SetDefaultJob job
+        
         Set line = sheet.Cells(index, 1)
         'JOBNAME
         job.JobName = line(1, 1)
@@ -358,6 +366,8 @@ Private Sub Class_Initialize()
     Set mJobs = New Collection
     Set mCheckers = New Collection
     Set mSchedulings = New Collection
+    mCreationDate = Format(Date, "yyyyMMdd")
+    mCreationTime = Format(Time, "HHmmss")
     
     mCheckers.Add New ConfigChecker, "Config"
     mCheckers.Add New GeneralSheetChecker, "General"
@@ -423,17 +433,16 @@ Public Function CreateFullPath(root As IFolder, paths As Variant, From As Intege
     If root Is Nothing Then
         Set top = New ISmartFolder
         Set s = top
-        
+        SetDefaultSmartFolder s
         path = paths(LBound(paths))
-        s.FolderName = path
         s.DataCenter = mDataCenter
         s.Version = mVERSION
         s.Platform = mPLATFORM
         Set job = top
         job.CreatedBy = mRunAsUser
         job.CreationUser = mRunAsUser
-        job.ParentFolder = s.FolderName
-        job.JobName = s.FolderName
+        job.ParentFolder = path
+        job.JobName = path
         current = From + 1
     Else
         Set top = root
@@ -451,10 +460,12 @@ Public Function CreateFullPath(root As IFolder, paths As Variant, From As Intege
         job.JobName = path
         job.Application = job.JobName
         job.ParentFolder = GetFolderPath(top)
-        top.AddSubItem job
+        top.AddSubItem job, top
         Set top = subFolder
     Next
     Set CreateFullPath = top
+    Set top = s
+    
 End Function
 
 Private Sub BuildFoldersStruction()
@@ -462,7 +473,7 @@ Private Sub BuildFoldersStruction()
     Dim job As IJob
     Dim paths As Variant
     Dim path As String
-    Dim Tag As ITag
+    Dim config As IXMLConfigItem
     Dim subFolder As IFolder
     Dim topFolder As IFolder
     Dim n As Integer
@@ -484,51 +495,64 @@ Private Sub BuildFoldersStruction()
            Do While Not job.Parent Is Nothing
             Set job = job.Parent
            Loop
+           Set sf = job
+           mSmartFolders.Add sf
            
-           mSmartFolders.Add job
         Else
            Set subFolder = FindSubFolder(topFolder, paths, LBound(paths) + 1)
         End If
-        subFolder.AddSubItem currentJob
+        subFolder.AddSubItem currentJob, subFolder
     Next
     
 End Sub
 
+Public Sub SetDefaultJob(job As IJob)
+    Dim base As ITagData
+    Set base = job
+    job.CreationDate = mCreationDate
+    job.CreationTime = mCreationTime
+End Sub
 
+
+
+Public Sub SetDefaultSmartFolder(smartFolder As ISmartFolder)
+    Dim base As ITagData
+    Dim job As IJob
+    Dim folder As IFolder
+    Set base = smartFolder
+    Set job = smartFolder
+    Set folder = smartFolder
+    
+    SetDefaultFolder folder
+    
+    smartFolder.Version = mVERSION
+    smartFolder.Platform = mPLATFORM
+    smartFolder.DaysKeepInNotOK = 0
+    smartFolder.DataCenter = mDataCenter
+    smartFolder.EnforceValidation = "N"
+    smartFolder.FolderOrderMethod = "SYSTEM"
+    smartFolder.UsedByCode = "0"
+    smartFolder.RemoveAtOnce = "N"
+    
+    job.JobISN = 1
+    job.TaskType = "SMART Table"
+    job.VersionSerial = "1"
+    
+End Sub
 Public Sub SetDefaultFolder(folder As IFolder)
     Dim base As ITagData
     Dim job As IJob
     
     Set base = folder
-    SetToEveryDay base
-    
     Set job = folder
-    SetDefaultJob job
-    base.MaxWait = "0"
-    base.Retro = "0"
     
-    job.ApplType = "OS"
+    SetDefaultJob job
+    
     job.Application = job.JobName
     job.SubApplication = job.JobName
     job.AutoArch = "1"
-    job.Confirm = "0"
-    job.Critical = "0"
     job.CreatedBy = mRunAsUser
-    job.CreationDate = Empty
-    job.CreationTime = Empty
-    
-    job.Cyclic = "0"
-    job.CyclicTolerance = "0"
-    job.CyclicType = "C"
-    job.IndCyclic = "S"
-    job.Interval = "00001M"
-    job.RuleBasedCalendarRelationship = "A"
     job.SysDB = "1"
     job.TaskType = "Sub-Table"
-    job.UseInStreamJCL = "N"
-    job.MaxDays = "0"
-    job.MaxRerun = "0"
-    job.MaxRuns = "0"
     job.SubApplication = Replace(GetFolderPath(job), "/", "_")
-    
 End Sub

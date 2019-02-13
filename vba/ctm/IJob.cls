@@ -714,7 +714,6 @@ Public Property Get Parent() As IJob
 End Property
 
 
-
 Private Sub Class_Initialize()
      Dim base As IXMLConfigItem
      Set mBase = New ITagData
@@ -743,7 +742,7 @@ Private Sub Class_Initialize()
      Set mON_GROUP = New Collection
      Set mCAPTURE = New Collection
 
-    mADJUST_COND = "N"
+    mADJUST_COND = Empty
     mJOBISN = Empty
      mAPPLICATION = Empty
      mSUB_APPLICATION = Empty
@@ -1393,8 +1392,6 @@ Private Function IXMLConfigItem_Export(doc As MSXML2.IXMLDOMDocument2, Parent As
     End If
     If Not IsEmpty(mADJUST_COND) Then
         current.setAttribute "ADJUST_COND", mADJUST_COND
-    Else
-        current.setAttribute "ADJUST_COND", "N"
     End If
     If Not IsEmpty(mJOBS_IN_GROUP) Then
         current.setAttribute "JOBS_IN_GROUP", mJOBS_IN_GROUP
