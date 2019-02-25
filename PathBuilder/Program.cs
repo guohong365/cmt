@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Xml ;
+using System.Xml;
+
 namespace PathBuilder
 {
 
@@ -27,7 +26,7 @@ namespace PathBuilder
                               new Job ("DB_FDM_MAP_F_CI_CROSSINDEX",    "ECIF/FDM/FDM_MAP/CI")
                           };
 
-            buildFolders(jobs );
+            BuildFolders(jobs );
 
             XmlDocument doc = new XmlDocument();
             XmlNode node= doc.CreateXmlDeclaration("1.0", "utf-8", "");
@@ -42,63 +41,63 @@ namespace PathBuilder
 
             doc.Save ("F:/tt.xml");
         }
-        private static IFolder FindItem(ICollection<IJob> items, string name)
+        private static ISubFolder FindItem(ICollection<IJob> items, string name)
         {
-            foreach (IJob item in items )
+            foreach (IJob item in items)
             {
-                if(item is IFolder && item.Name.Equals(name))
+                var folder = item as ISubFolder;
+                if (folder != null && Equals(folder.JobName, name))
                 {
-                    return (IFolder)item;
+                    return folder;
                 }
             }
             return null;
         }
-        private static IFolder CreateFullPath(IFolder parent, string[] paths, int begin)
+        private static ISubFolder CreateFullPath(ISubFolder parent, string[] paths, int begin)
         {
-            IFolder top=parent;
-            if (top == null) 
+            ISubFolder top = parent;
+            if (top == null)
             {
-                top = new Folder(paths[begin]);
+                top = new SmartFolder(paths[begin]);
                 begin++;
-            }            
+            }
             for (int i = begin; i < paths.Length; i++)
             {
-                IFolder current = new Folder(paths[i]);
+                ISubFolder current = new SubFolder(paths[i]);
                 top.Add(current);
                 top = current;
             }
-            return top;           
+            return top;
         }
 
-        private static IFolder FindSubItem(IFolder parent, string[] paths, int begin)
+        private static ISubFolder FindSubItem(ISubFolder parent, string[] paths, int begin)
         {
-            IFolder subItem;
-            IFolder current=parent;
-            for(int i=begin ; i<paths.Length ; i++)
+            ISubFolder subItem;
+            ISubFolder current = parent;
+            for (int i = begin; i < paths.Length; i++)
             {
-                subItem= FindItem (current.SubItems , paths[i]);
+                subItem = FindItem(current.SubItems, paths[i]);
                 if (subItem == null)
                 {
                     current = CreateFullPath(current, paths, i);
                     break;
                 }
                 current = subItem;
-            }            
+            }
             return current;
         }
 
-        private static  void buildFolders(Job[] jobs)
+        private static void BuildFolders(Job[] jobs)
         {
-            IFolder top;
-            IFolder last;
-            IJob  job;
+            ISubFolder top;
+            ISubFolder last;
+            IJob job;
 
-            foreach (IJob item in jobs  )
+            foreach (IJob item in jobs)
             {
-                string [] paths =item.Path.Split('/');
-
+                string[] paths = item.ParentFolder.ToString().Split('/');
                 top = FindItem(roots, paths[0]);
-                if (top ==null)
+                if (top == null)
                 {
                     last = CreateFullPath(null, paths, 0);
                     job = last;
@@ -108,7 +107,7 @@ namespace PathBuilder
                 }
                 else
                 {
-                    last=FindSubItem(top, paths, 1);
+                    last = FindSubItem(top, paths, 1);
                 }
                 last.Add(item);
             }

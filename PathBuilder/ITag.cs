@@ -1,10 +1,8 @@
-﻿using System.Xml;
-
-namespace PathBuilder
+﻿namespace PathBuilder
 {
-    public interface ITag
+    public interface ITag: IXmlConfigItem
     {
-        string TagName { get; set; }
-        XmlElement Export(XmlDocument doc, XmlElement parent);
+        string Name { get; set; }
+        object TagName { get; set; }
     }
 }

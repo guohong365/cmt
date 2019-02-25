@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Xml;
 
 namespace PathBuilder
 {
-    public class Folder : Job, IFolder
+    public class SubFolder :Job, ISubFolder
     {
-        public Folder():this("")
+        public SubFolder():this("")
         {
         }
 
@@ -18,10 +15,11 @@ namespace PathBuilder
             SubItems.Add(job);
             job.Parent = this;
         }
-        public Folder(string name):base(name)
+        public SubFolder(string name)
+            : base(name)
         {
             SubItems = new List<IJob>();
-            TagName = "SUB_FOLDER";
+            XmlTagName = "SUB_FOLDER";
         }
 
         public override XmlElement Export(XmlDocument doc, XmlElement parent)

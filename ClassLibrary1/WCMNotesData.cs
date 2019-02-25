@@ -7,8 +7,6 @@ namespace CTM
     {
         public Collection<WCMNote> NOTE_HISTORY;
 
-
-
         public NOTES_STATUS NOTES_STATUS;
         public String MESSAGE_DRAFT;
     }

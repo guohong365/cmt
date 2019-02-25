@@ -47,10 +47,20 @@
     <Compile Include="IFolder.cs" />
     <Compile Include="IJob.cs" />
     <Compile Include="ITag.cs" />
+    <Compile Include="ITagData.cs" />
+    <Compile Include="IXmlConfigItem.cs" />
     <Compile Include="Job.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tag.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="XMLFile1.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Folder.xsd">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
